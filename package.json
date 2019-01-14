@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "ts-loader": "5.3.3",
-    "typescript": "3.2.2"
+    "typescript": "3.2.2",
+    "vue-router": "^3.0.2"
   }
 }

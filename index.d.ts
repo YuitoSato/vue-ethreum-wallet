@@ -1,5 +1,7 @@
 declare module '*.vue' {
   import Vue from 'vue'
-  const _default: Vue
+  import VueRouter from 'vue-router'
+  Vue.use(VueRouter);
+  const _default: Vue;
   export default _default
 }
