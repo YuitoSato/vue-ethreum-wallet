@@ -25,7 +25,6 @@
       Card
     }
   })
-
   export default class extends Vue {
     @State people: Person[]
   }

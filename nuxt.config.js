@@ -56,11 +56,23 @@ export default {
   /*
   ** Build configuration
   */
-  css: ["~/assets/css/main.css"],
+  css: [
+    "~/assets/css/main.css",
+  ],
   build: {},
   modules: [
     "@nuxtjs/axios",
-    "~/modules/typescript.js"
+    '@nuxtjs/vuetify',
+    "~/modules/typescript.js",
   ],
+  vuetify: {
+    // Vuetify の設定はここに書く
+    theme: {
+      primary: '#3f51b5',
+      secondary: '#b0bec5',
+      accent: '#8c9eff',
+      error: '#b71c1c'
+    }
+  },
   axios: {}
 }

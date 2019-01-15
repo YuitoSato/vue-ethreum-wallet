@@ -30,8 +30,8 @@
 
   export default class extends Vue {
     routes = [
-      { path: '/sample', component: Sample },
-      { path: '/wallet', component: Wallet }
+      { name: 'wallet', path: '/wallet', component: Wallet },
+      { name: 'sample', path: '/sample', component: Sample },
     ];
 
     router = new VueRouter({
