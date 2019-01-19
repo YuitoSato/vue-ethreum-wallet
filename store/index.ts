@@ -6,14 +6,14 @@ export interface RootState {
   people: Person[];
   ethAccounts: EthAccount[];
   currentAddress: string;
-  errorMessages: string[];
+  error: Error | null;
 }
 
 export const state = (): RootState => ({
   people: [],
   ethAccounts: [],
   currentAddress: '',
-  errorMessages: []
+  error: null,
 });
 
 export const mutations: MutationTree<RootState> = {
@@ -27,6 +27,10 @@ export const mutations: MutationTree<RootState> = {
 
   setCurrentAddress(state: RootState, currentAddress: string): void {
     state.currentAddress = currentAddress;
+  },
+
+  setError(state: RootState, error: Error): void {
+    state.error = error
   }
 
 };
@@ -57,7 +61,10 @@ export const actions: ActionTree<RootState, RootState> = {
         commit("setEthAccounts", accounts);
         return accounts;
       })
-      .catch(e => console.log(e));
+      .catch((e: Error) => {
+        commit("setError", e);
+        return;
+      });
   },
 
   async sendEth({ commit }, { web3, sendEthRequest }) {
@@ -67,6 +74,19 @@ export const actions: ActionTree<RootState, RootState> = {
       from: sendEthRequest.senderAddress,
     };
 
-    return web3.eth.personal.sendTransaction(transaction, sendEthRequest.password);
+    return web3.eth.personal
+      .sendTransaction(transaction, sendEthRequest.password)
+      .then(() => {
+        commit('setError', null);
+        return;
+      })
+      .catch((e: Error) => {
+        commit("setError", e);
+        return;
+      });
+  },
+
+  async setError({ commit }, error) {
+    commit('setError', error);
   }
 };

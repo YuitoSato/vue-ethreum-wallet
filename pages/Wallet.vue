@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section class="wallet-container">
     <section>
       <v-data-table
         :headers="headers"
@@ -24,30 +24,35 @@
         <v-card-title primary-title>
           <h4>Send Eth</h4>
         </v-card-title>
-        <v-form v-on:submit.prevent="submit">
-          <v-text-field
-            prepend-icon="person"
-            name="Recipient Address"
-            label="Recipient Address"
-            v-model="ethForm.recipientAddress"
-          ></v-text-field>
-          <v-text-field
-            prepend-icon="lock"
-            name="Password"
-            label="Password"
-            type="password"
-            v-model="ethForm.password"
-          ></v-text-field>
-          <v-text-field
-            prepend-icon="attach_money"
-            name="Amount" label="Amount"
-            type="number"
-            v-model="ethForm.amount"
-          ></v-text-field>
-          <v-card-actions>
-            <v-btn type="submit" primary large block>Send</v-btn>
-          </v-card-actions>
-        </v-form>
+        <div class="card-content">
+          <p class="error-message" v-if="hasError()">
+            {{error.message}}
+          </p>
+          <v-form v-on:submit.prevent="submit">
+            <v-text-field
+              prepend-icon="person"
+              name="Recipient Address"
+              label="Recipient Address"
+              v-model="ethForm.recipientAddress"
+            ></v-text-field>
+            <v-text-field
+              prepend-icon="lock"
+              name="Password"
+              label="Password"
+              type="password"
+              v-model="ethForm.password"
+            ></v-text-field>
+            <v-text-field
+              prepend-icon="attach_money"
+              name="Amount" label="Amount"
+              type="number"
+              v-model="ethForm.amount"
+            ></v-text-field>
+            <v-card-actions>
+              <v-btn type="submit" primary large block>Send</v-btn>
+            </v-card-actions>
+          </v-form>
+        </div>
       </v-card>
     </section>
   </section>
@@ -80,9 +85,11 @@
   export default class extends Vue {
     @State ethAccounts: EthAccount[];
     @State currentAddress: string;
+    @State error: Error;
 
     @Action('fetchAccounts') fetchAccounts;
     @Action('sendEth') sendEth;
+    @Action('setError') setError;
 
     web3: Web3;
 
@@ -92,18 +99,19 @@
       amount: 0,
     };
 
-    created() {
-      // let web3 = new Web3('http://localhost:7545');
+    headers = [
+      {text: 'Address', value: 'address'},
+      {text: 'Balance', value: 'balanace'},
+    ];
 
+    created() {
       if (process.browser) {
         if (typeof window.web3 !== 'undefined') {
           window.web3 = new Web3(window.web3.currentProvider);
         } else {
-          console.log('error');
+          this.error = new Error("no metamask")
         }
-
         this.web3 = window.web3;
-
         this.fetchAccounts(this.web3);
       }
     }
@@ -125,23 +133,30 @@
       };
     }
 
-    headers = [
-      {text: 'Address', value: 'address'},
-      {text: 'Balance', value: 'balanace'},
-    ];
+    hasError() {
+      return !!this.error
+    }
   }
 </script>
 
 <style scoped>
+  .wallet-container {
+    width: 1000px;
+  }
   section {
     margin: 20px;
   }
 
-  v-card {
+  .v-card {
     margin-top: 20px;
+    height: 100%;
   }
 
-  form {
-    margin: 10px;
+  .card-content {
+    margin: 0 20px 20px 20px;
+  }
+
+  .error-message {
+    color: red;
   }
 </style>
