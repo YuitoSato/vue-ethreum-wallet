@@ -1,141 +1,147 @@
 <template>
   <section>
-    <h1>This is wallet</h1>
-    <v-data-table
-      :headers="headers"
-      :items="desserts"
-      :rowsPerPage="[1,2,3]"
-      class="elevation-1"
-    >
-      <template slot="items" slot-scope="props">
-        <td>{{ props.item.name }}</td>
-        <td class="text-xs-right">{{ props.item.calories }}</td>
-        <td class="text-xs-right">{{ props.item.fat }}</td>
-        <td class="text-xs-right">{{ props.item.carbs }}</td>
-        <td class="text-xs-right">{{ props.item.protein }}</td>
-        <td class="text-xs-right">{{ props.item.iron }}</td>
-      </template>
-    </v-data-table>
+    <section>
+      <v-data-table
+        :headers="headers"
+        :items="ethAccounts"
+        :rowsPerPage="[1,2,3]"
+        class="elevation-1"
+      >
+        <template slot="items" slot-scope="props">
+          <td>
+            <b
+              v-if="props.item.address === currentAddress"
+            >{{ props.item.address }}</b>
+            <span
+              v-if="props.item.address !== currentAddress"
+            >{{ props.item.address }}</span>
+          <td>{{ props.item.balance }}</td>
+        </template>
+      </v-data-table>
+    </section>
+    <section>
+      <v-card>
+        <v-card-title primary-title>
+          <h4>Send Eth</h4>
+        </v-card-title>
+        <v-form v-on:submit.prevent="submit">
+          <v-text-field
+            prepend-icon="person"
+            name="Recipient Address"
+            label="Recipient Address"
+            v-model="ethForm.recipientAddress"
+          ></v-text-field>
+          <v-text-field
+            prepend-icon="lock"
+            name="Password"
+            label="Password"
+            type="password"
+            v-model="ethForm.password"
+          ></v-text-field>
+          <v-text-field
+            prepend-icon="attach_money"
+            name="Amount" label="Amount"
+            type="number"
+            v-model="ethForm.amount"
+          ></v-text-field>
+          <v-card-actions>
+            <v-btn type="submit" primary large block>Send</v-btn>
+          </v-card-actions>
+        </v-form>
+      </v-card>
+    </section>
   </section>
 </template>
 
 <script lang="ts">
   import {
-    Component,
+    Action,
+    Component, State,
     Vue
   } from "nuxt-property-decorator"
+  import Web3 from 'web3';
+  import { EthAccount } from '~/models/eth_account';
+
+  interface Process {
+    browser: boolean
+  }
+
+  declare var process: Process;
+
+  interface Window {
+    web3: Web3
+  }
+
+  declare var window: Window;
 
   @Component({
     name: 'wallet'
   })
   export default class extends Vue {
-    headers = [
-      {
-        text: 'Dessert (100g serving)',
-        align: 'left',
-        sortable: false,
-        value: 'name'
-      },
-      { text: 'Calories', value: 'calories' },
-      { text: 'Fat (g)', value: 'fat' },
-      { text: 'Carbs (g)', value: 'carbs' },
-      { text: 'Protein (g)', value: 'protein' },
-      { text: 'Iron (%)', value: 'iron' }
+    @State ethAccounts: EthAccount[];
+    @State currentAddress: string;
 
-    ];
+    @Action('fetchAccounts') fetchAccounts;
+    @Action('sendEth') sendEth;
 
-    desserts = [
-      {
-        value: false,
-        name: 'Frozen Yogurt',
-        calories: 159,
-        fat: 6.0,
-        carbs: 24,
-        protein: 4.0,
-        iron: '1%'
-      },
-      {
-        value: false,
-        name: 'Ice cream sandwich',
-        calories: 237,
-        fat: 9.0,
-        carbs: 37,
-        protein: 4.3,
-        iron: '1%'
-      },
-      {
-        value: false,
-        name: 'Eclair',
-        calories: 262,
-        fat: 16.0,
-        carbs: 23,
-        protein: 6.0,
-        iron: '7%'
-      },
-      {
-        value: false,
-        name: 'Cupcake',
-        calories: 305,
-        fat: 3.7,
-        carbs: 67,
-        protein: 4.3,
-        iron: '8%'
-      },
-      {
-        value: false,
-        name: 'Gingerbread',
-        calories: 356,
-        fat: 16.0,
-        carbs: 49,
-        protein: 3.9,
-        iron: '16%'
-      },
-      {
-        value: false,
-        name: 'Jelly bean',
-        calories: 375,
-        fat: 0.0,
-        carbs: 94,
-        protein: 0.0,
-        iron: '0%'
-      },
-      {
-        value: false,
-        name: 'Lollipop',
-        calories: 392,
-        fat: 0.2,
-        carbs: 98,
-        protein: 0,
-        iron: '2%'
-      },
-      {
-        value: false,
-        name: 'Honeycomb',
-        calories: 408,
-        fat: 3.2,
-        carbs: 87,
-        protein: 6.5,
-        iron: '45%'
-      },
-      {
-        value: false,
-        name: 'Donut',
-        calories: 452,
-        fat: 25.0,
-        carbs: 51,
-        protein: 4.9,
-        iron: '22%'
-      },
-      {
-        value: false,
-        name: 'KitKat',
-        calories: 518,
-        fat: 26.0,
-        carbs: 65,
-        protein: 7,
-        iron: '6%'
+    web3: Web3;
+
+    ethForm = {
+      recipientAddress: '',
+      password: '',
+      amount: 0,
+    };
+
+    created() {
+      // let web3 = new Web3('http://localhost:7545');
+
+      if (process.browser) {
+        if (typeof window.web3 !== 'undefined') {
+          window.web3 = new Web3(window.web3.currentProvider);
+        } else {
+          console.log('error');
+        }
+
+        this.web3 = window.web3;
+
+        this.fetchAccounts(this.web3);
       }
-    ]
+    }
+
+    submit() {
+      const payload = {
+        web3: this.web3,
+        sendEthRequest: {
+          ...
+            this.ethForm,
+          senderAddress: this.currentAddress
+        }
+      };
+      this.sendEth(payload);
+      this.ethForm = {
+        recipientAddress: '',
+        password: '',
+        amount: 0
+      };
+    }
+
+    headers = [
+      {text: 'Address', value: 'address'},
+      {text: 'Balance', value: 'balanace'},
+    ];
+  }
+</script>
+
+<style scoped>
+  section {
+    margin: 20px;
   }
 
-</script>
+  v-card {
+    margin-top: 20px;
+  }
+
+  form {
+    margin: 10px;
+  }
+</style>

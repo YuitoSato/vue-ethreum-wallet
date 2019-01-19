@@ -8,7 +8,7 @@
     "nuxt": "2.3.4",
     "nuxt-property-decorator": "1.3.1",
     "vuex-class": "0.3.1",
-    "web3": "^1.0.0-beta.37"
+    "web3": "^1.0.0-beta.34"
   },
   "scripts": {
     "dev": "nuxt",

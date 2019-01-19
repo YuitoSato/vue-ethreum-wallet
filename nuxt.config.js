@@ -59,7 +59,8 @@ export default {
   css: [
     "~/assets/css/main.css",
   ],
-  build: {},
+  build: {
+  },
   modules: [
     "@nuxtjs/axios",
     '@nuxtjs/vuetify',
